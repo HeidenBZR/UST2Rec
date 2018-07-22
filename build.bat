@@ -1,0 +1,1 @@
+pyinstaller UST2Rec.py -F

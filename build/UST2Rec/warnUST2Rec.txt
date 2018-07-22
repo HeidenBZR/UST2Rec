@@ -1,0 +1,16 @@
+missing module named resource - imported by posix, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named posix - imported by os, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named _posixsubprocess - imported by subprocess, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named 'org.python' - imported by pickle, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py, xml.sax
+missing module named readline - imported by cmd, code, pdb, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+excluded module named _frozen_importlib - imported by importlib, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named _scproxy - imported by urllib.request
+missing module named java - imported by platform, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named 'java.lang' - imported by platform, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py, xml.sax._exceptions
+missing module named vms_lib - imported by platform, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named termios - imported by tty, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py, getpass
+missing module named grp - imported by tarfile, shutil, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named pwd - imported by posixpath, tarfile, shutil, http.server, webbrowser, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py, getpass
+missing module named ce - imported by os, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named org - imported by copy, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
+missing module named _dummy_threading - imported by dummy_threading, D:\DISCS\YandexDisk\Heiden\Кодим\_projects\UST2Rec\UST2Rec.py
