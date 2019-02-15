@@ -1,5 +1,7 @@
 import sys
 from os import path as p
+import os
+from tkinter import messagebox
 
 class File():
 
@@ -16,36 +18,34 @@ class Oto(File):
         self.names = []
         self.lines = {}
         self.loaded = False
+        messagebox.showinfo("info", path)
+        self.read_oto(path)
         
-        try:
-            f = open(self.path, "r")
-            self.loaded = True
-        except FileNotFoundError:
-            try:
-                f = open(self.basename, "r")
+    def read_oto(self, path):
+        for dir in os.listdir(path) + [""]:
+            if os.path.isdir(os.path.join(path, dir)):
+                filename = os.path.join(path, dir, "oto.ini")
+                print(filename)
+                if not os.path.exists(filename):
+                    continue
+                    
+                f = open(filename, "r")
                 self.loaded = True
-            except FileNotFoundError:
-                self.loaded = False
-                return None
-            
-        for line in f:
-            if line != "\n":
-                name, alias = get_alias(line)
-                if name not in self.names:
-                    self.names.append(name)
-                self.aliases[alias] = name
-                self.lines[alias] = line
-        f.close()
+                for line in f:
+                    if line != "\n":
+                        name, alias = get_alias(line)
+                        if name not in self.names:
+                            self.names.append(name)
+                        self.aliases[alias] = name
+                        self.lines[alias] = line
+                f.close()
         
-    def get_partial_oto(self, aliases, options):
+    def get_partial_oto(self, aliases):
         partial_oto = []
         for alias in aliases:
-            alias = options.prefix + alias + options.suffix
             partial_oto.append(self.lines[alias])
-            try:
-                partial_oto.append(self.lines["- " + alias])
-            except KeyError:
-                pass
+            # if "- " + alias in self.lines:
+                # partial_oto.append(self.lines["- " + alias])
         return partial_oto
 
 class Ust(File):
@@ -55,25 +55,27 @@ class Ust(File):
         self.lyrics = []
         f = open(self.path, "r")
         for line in f:
-            if line[0:5] == "Lyric":
-                lyric = line[6:-1]
+            if line.startswith("VoiceDir="):
+                self.VoiceDir = line[len("VoiceDir="):-1]
+            if line.startswith("@alias="):
+                lyric = line[len("@alias="):-1]
                 self.lyrics.append(lyric)
         f.close()
         
+        
 class Lyrics():
-    def __init__(self, usts):
+    def __init__(self, ust):
         self.lyrics = []
         self.names = []
         self.wrong_aliases = []
-        self.get_lyrics(usts)
+        self.get_lyrics(ust)
         self.lyrics_sort()
         self.kick_rests()
         
-    def get_lyrics(self, usts):
-        for ust in usts:
-            for lyric in ust.lyrics:
-                if lyric not in self.lyrics:
-                    self.lyrics.append(lyric)
+    def get_lyrics(self, ust):
+        for lyric in ust.lyrics:
+            if lyric not in self.lyrics:
+                self.lyrics.append(lyric)
                     
     def lyrics_sort(self):
         self.lyrics.sort()
@@ -95,23 +97,12 @@ class Lyrics():
         if "R"in self.lyrics:
             self.lyrics.remove("R")
             
-    def check_VCVs(self):
-        cons = "k k' g g' s s' z z' t t' d d' f f' v v' p p' b b' l m n r h l' m' n' r' h' sh sh' zh ts y ch".split(" ")
-        for i in range(len(self.lyrics)):
-            lyric = self.lyrics[i]
-            if  "- " in lyric and lyric.replace("- ","") not in cons:
-                self.lyrics[i] = lyric.replace("- ","")
-                print("Replaced [%s] with [%s]" % (lyric, self.lyrics[i]))
-        self.lyrics_sort()
             
-            
-            
-    def get_names(self, oto, options):
+    def get_names(self, oto):
         names = []
         wrong_aliases = []
         for lyric in self.lyrics:
             o_lyric = lyric
-            lyric = options.prefix + lyric + options.suffix
             if lyric in oto.aliases.keys():
                 if oto.aliases[lyric] not in names:
                     names.append(oto.aliases[lyric])
@@ -123,49 +114,6 @@ class Lyrics():
         self.wrong_aliases = wrong_aliases
 
 
-class Options():
-
-    def __init__(self, dir):
-        self.prefix = ""
-        self.suffix = ""
-        self.isVCVs = False
-        
-        f = self.open(dir)
-        if f: 
-            self.read(f)
-            f.close()
-        self.show()
-                
-    def open(self, dir):
-    
-        try:
-            f = open(dir+"\\options.ini", "r")
-        except FileNotFoundError:
-            try:
-                f = open("options.ini", "r")
-            except FileNotFoundError:
-                return False
-        return f
-        
-    def read(self, f):
-        for line in f:
-            line = line.replace("\n","")
-            var, value = line.split("=")
-            if var == "prefix":
-                self.prefix = value
-            if var == "suffix":
-                self.suffix = value
-            if var == "type" and value == "VCVs":
-                self.isVCVs = True
-                
-    def show(self):
-        print("prefix: [%s]" % self.prefix)
-        print("suffix: [%s]" % self.suffix)
-        print("is VCVs: %s" % self.isVCVs)
-        
-                
-    
-    
 def get_ext(basename):
     return basename.split(".")[-1]
     
@@ -195,61 +143,59 @@ def save_oto(oto):
     f.write("".join(oto))
 
 def __main__():
-    paths = sys.argv[1:]
-    dir = p.dirname(sys.argv[0])
-    print("Dir: %s" % dir)
-    oto = Oto(dir + "\\oto.ini")
-    print("Got oto.ini...")
-    if not oto.loaded:
-        input("Error: no oto.ini")
-        return False
-        
-    got_ust = False
-    usts = []
-    print("Dropped: ")
-    for path in paths:
-        print("path")
-        if get_ext(p.basename(path)).lower() == "ust":
+    global ust;
+
+    try:
+        path = sys.argv[1]
+        # messagebox.showinfo("got file", sys.argv[1])
+        print("Dir: %s" % path)
+            
+        got_ust = False
+        if get_ext(p.basename(path)).lower() == "tmp":
             if not got_ust:
                 got_ust = True
                 print("Got UST:")
-            usts.append(Ust(path))
-            print("\t%s" % usts[-1].name)
-    if not got_ust:
-        input("Error: got no ust")
-        return False
+            ust = Ust(path)
+            print("\t%s" % ust.name)
+        if not got_ust:
+            messagebox.showerror("error", "Error: got no ust")
+            return False
+            
+        oto = Oto(ust.VoiceDir)
+        if not oto.loaded:
+            messagebox.showerror("error", "Error: no oto.ini")
+            return False
+            
+        lyrics = Lyrics(ust)
         
-    print()    
-    options = Options(dir)
-    print()
-    
-    lyrics = Lyrics(usts)
-    if options.isVCVs: 
-        print("It's VCVs, so let's do something\n")
-        lyrics.check_VCVs()
-    
-    lyrics.get_names(oto, options)
-    
-    print()
-    
-    partial_oto = oto.get_partial_oto(lyrics.lyrics, options)
-    
-    if len(lyrics.names) > 0:
-    
-        save_names(lyrics.names)
-        save_lyrics(lyrics.lyrics)
-        save_oto(partial_oto)
-        print("Completed")
+        lyrics.get_names(oto)
+        
         print()
         
-        if len(lyrics.wrong_aliases) > 0:
-            print("Mismatched aliases:")
-            print("\n".join(lyrics.wrong_aliases))
-        else:
-            print("All aliases matched")
+        partial_oto = oto.get_partial_oto(lyrics.lyrics)
+        
+        if len(lyrics.names) > 0:
+        
+            save_names(lyrics.names)
+            save_lyrics(lyrics.lyrics)
+            save_oto(partial_oto)
+            print("Completed")
+            print()
             
-    else:
-    
-        input("No matches. Any suffix or prefix? Write it in options.ini and restart")
-
+            if len(lyrics.wrong_aliases) > 0:
+                print("Mismatched aliases:")
+                print("\n".join(lyrics.wrong_aliases))
+            else:
+                print("All aliases matched")
+                
+        else:
+        
+            messagebox.showwarning("warning", "no matches; something is wrong")
+            print("No matches")
+            
+        messagebox.showinfo("success", "result saved on %s" % os.path.abspath("result"))
+    except Exception as inst:
+        message = "%s \n" % type(inst)
+        message += "%s \n" % ", ".join(inst.args)
+        messagebox.showerror("error", message)
 __main__()

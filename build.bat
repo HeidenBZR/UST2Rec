@@ -1,1 +1,1 @@
-pyinstaller UST2Rec.py -F
+pyinstaller UST2Rec.py -F --distpath "D:\Program Files (x86)\UTAU\plugins\UST2Reclist"

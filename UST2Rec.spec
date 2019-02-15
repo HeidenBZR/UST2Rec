@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['UST2Rec.py'],
-             pathex=['D:\\DISCS\\YandexDisk\\Heiden\\Кодим\\_projects\\UST2Rec'],
+             pathex=['D:\\Github\\UST2Rec'],
              binaries=[],
              datas=[],
              hiddenimports=[],
