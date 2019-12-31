@@ -137,6 +137,11 @@ def save_lyrics(lyrics):
     f = open(filename, "w")
     f.write("\n".join(lyrics))
     
+def save_wrong_aliases(names):
+    filename = "result\wrong aliases (%i).txt" % len(names)
+    f = open(filename, "w")
+    f.write("\n".join(names))
+    
 def save_oto(oto):
     filename = "result\oto.ini"
     f = open(filename, "w")
@@ -185,6 +190,7 @@ def __main__():
             if len(lyrics.wrong_aliases) > 0:
                 print("Mismatched aliases:")
                 print("\n".join(lyrics.wrong_aliases))
+                save_wrong_aliases(lyrics.wrong_aliases)
             else:
                 print("All aliases matched")
                 
